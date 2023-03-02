@@ -1,4 +1,6 @@
 import argparse
+import torch
+from data_transform import Datasets
 
 parser = argparse.ArgumentParser(description='Growing Tree Hierarchy')
 parser.add_argument('--dir', default='.', help='path to dir')
@@ -10,6 +12,10 @@ parser.add_argument('--lr', default=0.01, type=float, help='initial learning rat
 
 def main():
     args = parser.parse_args()
+    args.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    dataset = Datasets(args.dir)
+    train_data = dataset.get_train_dataset(args.dataset_name)
+    valid_data = dataset.get_valid_dataset(args.dataset_name)
     print(args)
 
 if __name__ == "__main__":
