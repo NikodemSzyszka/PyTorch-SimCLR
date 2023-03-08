@@ -33,10 +33,10 @@ class Datasets:
     
 class TwoViews:
     def __init__(self, transform_pipeline ):
-        self.transform_pipeline  = transform_pipeline 
+        self.transform_pipeline = transform_pipeline 
 
     def __call__(self, x):
-        return [self.transform_pipeline (x), self.transform_pipeline (x)]
+        return [self.transform_pipeline(x), self.transform_pipeline(x)]
         
                         
     
