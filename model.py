@@ -4,7 +4,7 @@ import torchvision.models as models
 class SimCLR(nn.Module):
 
     def __init__(self):
-        super(GrowingTreeModel, self).__init__()
+        super(SimCLR, self).__init__()
         self.resnet = models.resnet18(pretrained=False, num_classes = 2048)
         self.resnet.conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
         self.resnet.fc = nn.Identity()

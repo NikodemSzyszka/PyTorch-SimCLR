@@ -1,6 +1,8 @@
 import argparse
 import torch
 from data_transform import Datasets
+from model import SimCLR
+from training import TrainingModule
 
 parser = argparse.ArgumentParser(description='Growing Tree Hierarchy')
 parser.add_argument('--dir', default='.', help='path to dir')
@@ -14,14 +16,17 @@ parser.add_argument('--train', default=True, type=bool, help='True - train, Fals
 def main():
     args = parser.parse_args()
     args.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    if train:
+    if args.train:
         dataset = Datasets(args.dir)
-        train_data = dataset.get_train_dataset(args.dataset_name)
+        train_dataset = dataset.get_train_dataset(args.dataset_name)
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, 
                                                 num_workers = 2, pin_memory = True, drop_last=True)
-        model = SimClr()
+        model = SimCLR()
         model.to(args.device)
         optimizer = torch.optim.Adam(model.parameters(), args.lr)
+        train_module = TrainingModule(model=model, optimizer=optimizer, args=args)
+        print(args)
+        train_module.train(train_loader)
     else:
         valid_data = dataset.get_valid_dataset(args.dataset_name)
         valid_loader = torch.utils.data.DataLoader(validset, batch_size=1, shuffle=True, 
