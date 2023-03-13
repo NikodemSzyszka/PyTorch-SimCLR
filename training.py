@@ -12,7 +12,9 @@ class TrainingModule():
         
     def loss(self, representations):
         similarity = nn.functional.cosine_similarity(representations.unsqueeze(1), representations, dim = -1)
-        return self.criterion(similarity, torch.zeros(similarity.shape[0], dtype = torch.long).to(self.args.device))
+        mask = torch.eye(similarity.size(0), similarity.size(1)).bool()
+        off_diagonal = similarity[~mask].view(similarity.size(0), similarity.size(1) - 1)
+        return self.criterion(off_diagonal, torch.zeros(off_diagonal.shape[0], dtype = torch.long).to(self.args.device))
 
     def train(self, train_loader):
         for epoch_counter in range(self.args.epochs):
