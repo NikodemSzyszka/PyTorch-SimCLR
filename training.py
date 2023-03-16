@@ -6,11 +6,19 @@ class TrainingModule():
 
     def __init__(self, *args, **kwargs):
         self.args = kwargs['args']
-        self.model = kwargs['model'].to(self.args.device)
+        self.model = kwargs['model']
         self.optimizer = kwargs['optimizer']
+        self.scheduler = kwargs['scheduler']
         self.criterion = nn.CrossEntropyLoss().to(self.args.device)
         self.masks = self.create_masks(2 * self.args.batch_size)
-        
+    
+    def create_masks(self, N):
+        idx = torch.cat([torch.arange(N//2, N), torch.arange(N//2)], dim = 0)
+        positive_mask = torch.eye(N, dtype = torch.bool)[idx]
+        negative_mask = ~torch.eye(N, dtype = torch.bool)[idx]
+        negative_mask.fill_diagonal_(False)
+        return positive_mask, negative_mask
+
     def loss(self, representations):
         similarity = nn.functional.cosine_similarity(representations.unsqueeze(1), representations, dim = -1)
         positives = similarity[self.masks[0]].unsqueeze(-1)
@@ -27,10 +35,5 @@ class TrainingModule():
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
+            self.scheduler.step()
                 
-    def create_masks(self, N):
-        idx = torch.cat([torch.arange(N//2, N), torch.arange(N//2)], dim = 0)
-        positive_mask = torch.eye(N, dtype = torch.bool)[idx]
-        negative_mask = ~torch.eye(N, dtype = torch.bool)[idx]
-        negative_mask.fill_diagonal_(False)
-        return positive_mask, negative_mask
