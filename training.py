@@ -9,12 +9,13 @@ class TrainingModule():
         self.model = kwargs['model'].to(self.args.device)
         self.optimizer = kwargs['optimizer']
         self.criterion = nn.CrossEntropyLoss().to(self.args.device)
+        self.masks = self.create_masks(2 * self.args.batch_size)
         
     def loss(self, representations):
         similarity = nn.functional.cosine_similarity(representations.unsqueeze(1), representations, dim = -1)
-        mask = torch.eye(similarity.size(0), similarity.size(1)).bool()
-        off_diagonal = similarity[~mask].view(similarity.size(0), similarity.size(1) - 1)
-        return self.criterion(off_diagonal, torch.zeros(off_diagonal.shape[0], dtype = torch.long).to(self.args.device))
+        positives = similarity[self.masks[0]].unsqueeze(-1)
+        negatives = similarity[self.masks[1]].view(2*self.args.batch_size, -1)
+        return self.criterion(torch.cat([positives, negatives], dim =1), torch.zeros(2*self.args.batch_size, dtype = torch.long, device = self.args.device))
 
     def train(self, train_loader):
         for epoch_counter in range(self.args.epochs):
@@ -25,4 +26,10 @@ class TrainingModule():
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
-
+                
+    def create_masks(self, N):
+        idx = torch.cat([torch.arange(N//2, N), torch.arange(N//2)], dim = 0)
+        positive_mask = torch.eye(N, dtype = torch.bool)[idx]
+        negative_mask = ~torch.eye(N, dtype = torch.bool)[idx]
+        negative_mask.fill_diagonal_(False)
+        return positive_mask, negative_mask
