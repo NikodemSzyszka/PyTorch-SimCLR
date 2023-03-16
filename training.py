@@ -15,7 +15,8 @@ class TrainingModule():
         similarity = nn.functional.cosine_similarity(representations.unsqueeze(1), representations, dim = -1)
         positives = similarity[self.masks[0]].unsqueeze(-1)
         negatives = similarity[self.masks[1]].view(2*self.args.batch_size, -1)
-        return self.criterion(torch.cat([positives, negatives], dim =1), torch.zeros(2*self.args.batch_size, dtype = torch.long, device = self.args.device))
+        labels = torch.zeros(2 * self.args.batch_size, dtype = torch.long, device = self.args.device)
+        return self.criterion(torch.cat([positives, negatives], dim =1)/self.args.temperature, labels)
 
     def train(self, train_loader):
         for epoch_counter in range(self.args.epochs):
