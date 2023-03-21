@@ -16,7 +16,7 @@ parser.add_argument('--lr_scaling', default='none', help='dataset name', choices
 parser.add_argument('--train', default=True, type=bool, help='True - train, False - valid')
 parser.add_argument('--temperature', default=0.1, type=float, help='Temperature parameter in loss funcion (default: 0.1)')
 parser.add_argument('--weight_decay', default=1e-6, type=float, help='weight decay (default: 1e-6)')
-
+parser.add_argument('--save frequency', default=100, type=int, help='save frequency(default: 100)')
 
 def main():
     args = parser.parse_args()

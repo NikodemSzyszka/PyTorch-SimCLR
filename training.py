@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from tqdm import tqdm
+import os
 
 class TrainingModule():
 
@@ -36,4 +37,15 @@ class TrainingModule():
                 loss.backward()
                 self.optimizer.step()
             self.scheduler.step()
-                
+            if epoch_counter % self.args.save_frequency:
+                torch.save({'epoch': epoch_counter,
+                            'state_dict': self.model.state_dict(),
+                            'optimizer': self.optimizer.state_dict(),
+                            'scheduler': self.scheduler.state_dict(),
+                            }, f=os.path.join(self.args.dir, f'Simclr_checkpoint_{epoch_counter}.tar'))
+
+        torch.save({'epoch': self.args.epochs,
+                    'state_dict': self.model.state_dict(),
+                    'optimizer': self.optimizer.state_dict(),
+                    'scheduler': self.scheduler.state_dict(),
+                    }, f=os.path.join(self.args.dir, f'Simclr_checkpoint_FinalModel.tar'))         
