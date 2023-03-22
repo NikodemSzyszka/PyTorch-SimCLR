@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 import os
+from torch.utils.tensorboard import SummaryWriter
 
 class TrainingModule():
 
@@ -12,6 +13,7 @@ class TrainingModule():
         self.scheduler = kwargs['scheduler']
         self.criterion = nn.CrossEntropyLoss().to(self.args.device)
         self.masks = self.create_masks(2 * self.args.batch_size)
+        self.logs = SummaryWriter(log_dir=f"{self.args.dir}/logs")
     
     def create_masks(self, N):
         idx = torch.cat([torch.arange(N//2, N), torch.arange(N//2)], dim = 0)
@@ -36,6 +38,8 @@ class TrainingModule():
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
+                
+            self.logs.add_scalar('Loss', loss, global_step = epoch_counter)
             self.scheduler.step()
             if epoch_counter % self.args.save_frequency:
                 torch.save({'epoch': epoch_counter,
