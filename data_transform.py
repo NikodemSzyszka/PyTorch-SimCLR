@@ -7,12 +7,15 @@ class Datasets:
         self.datasets_train = { 'mnist': lambda: datasets.MNIST(self.root, train=True,
                                                         transform = TwoViews(self.get_data_augmentation()), download=True),
                                 'fmnist': lambda: datasets.FashionMNIST(self.root, train=True,
-                                                        transform = TwoViews(self.get_data_augmentation()), download=True)                                  
+                                                        transform = TwoViews(self.get_data_augmentation()), download=True),
+                                'cifar10': lambda: datasets.CIFAR10(self.root, train=True,
+                                                        transform = TwoViews(self.get_data_augmentation()), download = True),                                  
                                 }
         self.datasets_valid = { 'mnist': lambda: datasets.MNIST(self.root, train=False,
-                                                        transform= transforms.ToTensor(), download=True),
+                                                        transform = transforms.ToTensor(), download=True),
                                 'fmnist': lambda: datasets.FashionMNIST(self.root, train=False,
-                                                        transform = transforms.ToTensor(), download=True)                                  
+                                                        transform = transforms.ToTensor(), download=True),
+                                'cifar10': lambda: datasets.CIFAR10(self.root, train=False, transform=transforms.ToTensor(), download=True)                            
                                 }
                                 
     @staticmethod
@@ -32,7 +35,7 @@ class Datasets:
         return self.datasets_valid[dataset_name]()
     
 class TwoViews:
-    def __init__(self, transform_pipeline ):
+    def __init__(self, transform_pipeline):
         self.transform_pipeline = transform_pipeline 
 
     def __call__(self, x):
